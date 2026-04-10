@@ -29,4 +29,7 @@ This project helps understand scheduling algorithms visually.
 
 ## 👨‍💻 Author
 
-Your Name
+Nitya 
+
+# cpu-scheduling-visualizer
+
