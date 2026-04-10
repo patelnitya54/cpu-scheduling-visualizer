@@ -1,0 +1,210 @@
+<!--
+  CPU Scheduling Visualizer
+
+  How to run locally:
+  1. VS Code Live Server:
+     - Open the folder "cpu-scheduling-visualizer" in VS Code.
+     - Right-click this file (index.html).
+     - Click "Open with Live Server".
+     - A clickable localhost link will open, usually like:
+       http://127.0.0.1:5500/cpu-scheduling-visualizer/
+
+  2. Node.js static server:
+     - Open a terminal in this folder.
+     - Run: npx serve .
+     - Open the localhost link shown in the terminal, usually like:
+       http://127.0.0.1:3000
+
+  No backend is required. Everything runs in the browser.
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CPU Scheduling Visualizer</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Operating Systems Mini Project</p>
+          <h1>CPU Scheduling Visualizer</h1>
+          <p class="hero-text">
+            Add processes, choose an algorithm, and watch how the CPU schedules
+            them step by step.
+          </p>
+        </div>
+        <div class="time-card">
+          <span class="time-label">Current Time</span>
+          <strong id="currentTime">0</strong>
+        </div>
+      </header>
+
+      <main class="grid-layout">
+        <section class="card">
+          <h2>1. Input Form</h2>
+          <div id="errorMessage" class="message error hidden"></div>
+          <div id="successMessage" class="message success hidden"></div>
+
+          <form id="processForm" class="form-grid">
+            <label>
+              <span>Process ID</span>
+              <input
+                type="text"
+                id="processId"
+                placeholder="Example: P1"
+                maxlength="10"
+              />
+            </label>
+
+            <label>
+              <span>Arrival Time</span>
+              <input
+                type="number"
+                id="arrivalTime"
+                placeholder="0"
+                min="0"
+              />
+            </label>
+
+            <label>
+              <span>Burst Time</span>
+              <input type="number" id="burstTime" placeholder="5" min="1" />
+            </label>
+
+            <button type="submit" class="primary-btn">Add Process</button>
+          </form>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Process</th>
+                  <th>Arrival</th>
+                  <th>Burst</th>
+                  <th>Color</th>
+                </tr>
+              </thead>
+              <tbody id="processTableBody">
+                <tr>
+                  <td colspan="4" class="empty-text">
+                    No processes added yet.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>2. Algorithm Selector</h2>
+          <div class="controls-grid">
+            <label>
+              <span>Scheduling Algorithm</span>
+              <select id="algorithm">
+                <option value="fcfs">FCFS</option>
+                <option value="sjf">SJF (Non-preemptive)</option>
+                <option value="rr">Round Robin</option>
+              </select>
+            </label>
+
+            <label id="quantumGroup" class="hidden">
+              <span>Time Quantum</span>
+              <input type="number" id="timeQuantum" min="1" value="2" />
+            </label>
+
+            <label>
+              <span>Context Switch Time</span>
+              <input type="number" id="contextSwitchTime" min="0" value="0" />
+            </label>
+
+            <label>
+              <span>Speed</span>
+              <select id="speed">
+                <option value="900">Slow</option>
+                <option value="500" selected>Medium</option>
+                <option value="220">Fast</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="button-row">
+            <button id="startBtn" class="primary-btn" type="button">
+              Start Simulation
+            </button>
+            <button id="pauseBtn" class="secondary-btn" type="button" disabled>
+              Pause
+            </button>
+            <button id="resetBtn" class="ghost-btn" type="button">Reset</button>
+          </div>
+        </section>
+
+        <section class="card full-width">
+          <h2>3. Visualization Area</h2>
+          <div class="visual-grid">
+            <div>
+              <h3>Ready Queue</h3>
+              <div id="queueContainer" class="queue-area">
+                <div class="empty-state">Processes waiting for CPU will appear here.</div>
+              </div>
+            </div>
+
+            <div>
+              <h3>CPU Execution</h3>
+              <div id="cpuBox" class="cpu-box">
+                <span class="cpu-label">CPU</span>
+                <strong id="cpuProcessName">Idle</strong>
+                <small id="cpuProcessMeta">Waiting to start...</small>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card full-width">
+          <h2>4. Gantt Chart</h2>
+          <div id="ganttChart" class="gantt-chart"></div>
+          <div id="timeMarkers" class="time-markers"></div>
+        </section>
+
+        <section class="card full-width">
+          <h2>5. Output</h2>
+          <div id="resultsSummary" class="summary-grid">
+            <div class="summary-card">
+              <span>Average Waiting Time</span>
+              <strong id="avgWaiting">0</strong>
+            </div>
+            <div class="summary-card">
+              <span>Average Turnaround Time</span>
+              <strong id="avgTurnaround">0</strong>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Process ID</th>
+                  <th>Arrival Time</th>
+                  <th>Burst Time</th>
+                  <th>Completion Time</th>
+                  <th>Turnaround Time</th>
+                  <th>Waiting Time</th>
+                </tr>
+              </thead>
+              <tbody id="resultsTableBody">
+                <tr>
+                  <td colspan="6" class="empty-text">
+                    Run a simulation to see results.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
